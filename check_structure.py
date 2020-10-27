@@ -191,13 +191,16 @@ def main():
             atoms = sorted(atoms, key=lambda atm: sortdict[atm.name])
             if len(atoms) != len(atomnames):
                 print("ERROR: Not all atoms found in system.")
-                print("Missing atoms:", set(atomnames)-set([atm.name for atm in atoms]))
+                print("Missing atoms:", set(atomnames) ^ set([atm.name for atm in atoms]))
                 sys.exit()
 
             LOGGER.debug("at bond %s for atoms %s", bondtype, [atm.name for atm in atoms])
 
             if bondtype == "chiral":
-                correct = check_chirality(*atoms)
+                if len(atoms) == 5: # chiral can also be chiral modifier
+                    correct = check_chirality(*atoms)
+                else:
+                    continue
             elif bondtype in ["cis", "trans"]:
                 correct = check_cistrans(*atoms, bondtype=bondtype)
             else:
